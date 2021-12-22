@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: 'Creates CodePipeline Lambda Resources Stack for Homework #3'
+Resources:
+
+  LambdaCodeBuildProject:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: hw3-lambda-build
+      Description: Build and deploy HW3 lambda function
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+      Source:
+        Type: GITHUB
+        Location: https://github.com/steveviens/deepak-hw3.git      # TODO: Replace this with your GitHub repo
+        BuildSpec: 'buildspec/lambda_buildspec.yml'
+      Triggers:
+        BuildType: BUILD
+        Webhook: True
+        FilterGroups:
+        - - Type: EVENT
+            Pattern: PUSH
+      TimeoutInMinutes: 10
+
+  CodeBuildServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: hw3-code-pipeline-service-role
+      Description: Allows CodePipeline to do it's thing.
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+                - codebuild.amazonaws.com
+                - codedeploy.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: hw3-code-pipeline-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "lambda:AddPermission"
+                  - "lambda:CreateFunction"
+                  - "lambda:DeleteFunction"
+                  - "lambda:GetFunction"
+                  - "lambda:GetFunctionConfiguration"
+                  - "lambda:PutFunctionConcurrency"
+                  - "lambda:RemovePermission"
+                  - "lambda:UpdateFunctionCode"
+                  - "lambda:UpdateFunctionConfiguration"
+                  - "lambda:PublishVersion"
+                  - "lambda:EnableReplication"
+                Resource:
+                  - !Sub "arn:aws:lambda:*:${AWS::AccountId}:function:*"
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:GetObject'
+                  - 's3:GetObjectVersion'
+                  - 's3:GetBucketAcl'
+                  - 's3:GetBucketLocation'
+                Resource:
+                  - !Sub 'arn:aws:s3:::hw3-1323-artifacts*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource:
+                  - !Sub 'arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/codebuild/*'
+                  - !Sub >-
+                    arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/codebuild/*:log-stream:*
+              - Effect: Allow
+                Action:
+                  - 'codebuild:BatchGetBuilds'
+                  - 'codebuild:StartBuild'
+                Resource:
+                  - !Sub 'arn:aws:codebuild:*:${AWS::AccountId}:project/hw3-code-build-deploy2stage'
+                  - !Sub 'arn:aws:codebuild:*:${AWS::AccountId}:project/hw3-code-build-deploy2prod'
+              - Effect: Allow
+                Action:
+                  - 'iam:GetRole'
+                  - 'iam:GetRolePolicy'
+                Resource: !Sub 'arn:aws:iam::${AWS::AccountId}*'
+              - Effect: Allow
+                Action:
+                  - 'cloudformation:CreateStack'
+                  - 'cloudformation:UpdateStack'
+                  - 'cloudformation:DeleteStack'
+                  - 'cloudformation:Describe*'
+                  - 'cloudformation:List*'
+                  - 'cloudformation:Get*'
+                  - 'cloudformation:PreviewStackUpdate'
+                  - 'cloudformation:ValidateTemplate'
+                Resource: !Sub 'arn:aws:cloudformation:*:${AWS::AccountId}:stack/*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'logs:DeleteLogGroup'
+                  - 'logs:DeleteLogStream'
+                  - 'logs:DescribeLog*'
+                  - 'logs:FilterLogEvents'
+                Resource:
+                  - !Sub 'arn:aws:logs:*:${AWS::AccountId}:log-group::log-stream*'

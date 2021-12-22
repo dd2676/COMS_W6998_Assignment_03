@@ -33,6 +33,9 @@ REPLY_TEMPLATE = {
 
 def lambda_handler(event, context):
 
+    # Get the Prediction Engine endpoint environment variable
+    ENDPOINT_NAME = os.environ['ENDPOINT_NAME']
+    logger.info('Prediction Engine Endpoint={}'.format(ENDPOINT_NAME))
     # Print formatted JSON event object to log
     t1 = time.time()
     print("##### START_TIME = {} #####".format(t1-t1))
@@ -98,7 +101,7 @@ def lambda_handler(event, context):
     b = type(origin_body_bytestream)
     print("origin_body_bytestream length = {}, type = {}".format(a,b)) # .format(len(origin_body_bytestream),type(origin_body_bytestream)))
     
-    response = sagemaker_runtime.invoke_endpoint(EndpointName='sms-spam-classifier-ll-2021-12-14-07-17-07-278', 
+    response = sagemaker_runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME, 
                                   ContentType='text/csv',
                                   Body=origin_body_bytestream)
     result = json.loads(response['Body'].read().decode())

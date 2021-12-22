@@ -6,7 +6,7 @@ Parameters:
   PredictionEndpointParameter:
     Type: String
     Description: HW3 Prediction Endpoint                    
-    Default: "replace_with_prediction_endpoint"
+    Default: "sms-spam-classifier-ll-2021-12-14-07-17-07-278"
 
 Resources:
 

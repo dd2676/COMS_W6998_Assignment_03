@@ -5,7 +5,7 @@ Parameters:
 
   PredictionEndpointParameter:
     Type: String
-    Description: HW3 Prediction Endpoint                    # TODO: See page 4 of the doc/HW3.pdf (search for "E1")
+    Description: HW3 Prediction Endpoint                    
     Default: "replace_with_prediction_endpoint"
 
 Resources:
@@ -14,13 +14,13 @@ Resources:
     Type: AWS::S3::Bucket
     DependsOn: LambdaFunctionTriggerPermission
     Properties:
-      BucketName: 'hw3-dd2676-email-bucket'                          # TODO: Change the 1323 to something unique (e.g. "dd2676")
-      VersioningConfiguration:                              # TODO: Bucket versioning is required
+      BucketName: 'hw3-dd2676-email-bucket'                        
+      VersioningConfiguration:                             
         Status: Enabled
-      NotificationConfiguration:                            # TODO: This is the Lambda Trigger
+      NotificationConfiguration:                            
         LambdaConfigurations:
           - Event: s3:ObjectCreated:*
-            Function: !GetAtt PredictSpamLambda.Arn         # TODO: This is the Lambda Funtion
+            Function: !GetAtt PredictSpamLambda.Arn         
 
   EmailBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -47,7 +47,7 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName: !GetAtt PredictSpamLambda.Arn
       Principal: s3.amazonaws.com
-      SourceArn: !Sub 'arn:aws:s3:::hw3-dd2676-email-bucket'         # TODO: Change the 1323 to something unique (e.g. 'dd2676') - match line 17
+      SourceArn: !Sub 'arn:aws:s3:::hw3-dd2676-email-bucket'         
       SourceAccount: !Ref AWS::AccountId
 
   LambdaFunctionExecutionRole:
@@ -112,7 +112,7 @@ Resources:
       Rule:
         Name: hw3-ses-receipt-rule
         Recipients:
-          - dd2676@deepak-dwarakanath.com                                  # TODO: Change 'hw3@viegeco.com to email address you are filtering spam for
+          - dd2676@deepak-dwarakanath.com                                
         Actions:
           - S3Action:
               BucketName: !Ref EmailBucket

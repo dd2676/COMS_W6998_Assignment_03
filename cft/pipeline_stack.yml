@@ -16,8 +16,8 @@ Resources:
         Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
       Source:
         Type: GITHUB
-        Location: https://github.com/steveviens/deepak-hw3.git      # TODO: Replace this with your GitHub repo
-        BuildSpec: 'buildspec/lambda_buildspec.yml'
+        Location: https://github.com/dd2676/COMS_W6998_Assignment_03.git      
+        BuildSpec: 'buildspec.yml'
       Triggers:
         BuildType: BUILD
         Webhook: True
@@ -70,7 +70,7 @@ Resources:
                   - 's3:GetBucketAcl'
                   - 's3:GetBucketLocation'
                 Resource:
-                  - !Sub 'arn:aws:s3:::hw3-1323-artifacts*'
+                  - !Sub 'arn:aws:s3:::hw3-dd2676-artifacts*'
               - Effect: Allow
                 Action:
                   - 'logs:CreateLogGroup'
